@@ -15,3 +15,5 @@
 - [04_bonus_dataloader-intuition](04_bonus_dataloader-intuition) 包含使用简单数字而不是文本更直观地解释数据加载器代码的可选代码
 
 - [05_bpe-from-scratch](05_bpe-from-scratch) 包含从头开始实现和训练GPT-2 BPE分词器代码
+
+- [06_personal-bias](06_personal-bias) 包含个人以下来自于各个地方的代码
