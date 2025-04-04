@@ -6,4 +6,4 @@
 
 ### Optional Code
 
-- [multihead-attention.ipynb](multihead-attention.ipynb) 是一个最小的notebook，本章实现了主要数据加载管道
+- [multihead-attention.ipynb](multihead-attention.ipynb) 是本章中主要数据加载管道的最小化实现
