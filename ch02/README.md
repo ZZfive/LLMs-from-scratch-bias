@@ -17,3 +17,13 @@
 - [05_bpe-from-scratch](05_bpe-from-scratch) 包含从头开始实现和训练GPT-2 BPE分词器代码
 
 - [06_personal-bias](06_personal-bias) 包含个人以下来自于各个地方的代码
+
+
+
+
+在下面的视频中，提供了一个代码同步学习环节，作为补充材料涵盖了一些章节内容。
+
+<br>
+<br>
+
+[![Link to the video](https://img.youtube.com/vi/341Rb8fJxY0/0.jpg)](https://www.youtube.com/watch?v=341Rb8fJxY0)
