@@ -26,16 +26,16 @@ random.seed(42)
 '''
 {% if messages[0]['role'] == 'system' %}  # 如果第一条消息是系统消息
     {% set system_message = messages[0]['content'] %}  # 获取系统消息的内容
-    {{ '<s>system\n' + system_message + '</s>\n' }}  # 将系统消息转换为BPE分词器可以理解的格式
+    {{ '<s>system\n' + system_message + '</s>\n' }}
 {% else %}
     {{ '<s>system\n你是 MiniMind，是一个有用的人工智能助手。</s>\n' }}  # 如果第一条消息不是系统消息，则使用默认的系统消息
 {% endif %}
 {% for message in messages %}
     {% set content = message['content'] %}
     {% if message['role'] == 'user' %}
-        {{ '<s>user\n' + content + '</s>\n<s>assistant\n' }}  # 如果消息是用户消息，则使用BPE分词器可以理解的格式
+        {{ '<s>user\n' + content + '</s>\n<s>assistant\n' }}  # 如果消息是用户消息
     {% elif message['role'] == 'assistant' %}
-        {{ content + '</s>' + '\n' }}  # 如果消息是助手消息，则使用BPE分词器可以理解的格式
+        {{ content + '</s>' + '\n' }}  # 如果消息是助手消息
     {% endif %}
 {% endfor %}
 '''
