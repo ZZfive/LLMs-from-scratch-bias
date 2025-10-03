@@ -32,10 +32,10 @@ class MultiHeadAttention(nn.Module):
         )
 
         ####################################################
-        # NEW
+        # NEW  注册用于存储kV的缓存，persistent=False 表示这些buffer不会被保存到模型的state_dict中
         self.register_buffer("cache_k", None, persistent=False)
         self.register_buffer("cache_v", None, persistent=False)
-        self.ptr_current_pos = 0
+        self.ptr_current_pos = 0  # 记录当前处于mask中的位置
         ####################################################
 
     def forward(self, x, use_cache=False):
@@ -54,9 +54,9 @@ class MultiHeadAttention(nn.Module):
         ####################################################
         # NEW
         if use_cache:
-            if self.cache_k is None:
+            if self.cache_k is None:  # 如果缓存为空，则初始化缓存
                 self.cache_k, self.cache_v = keys_new, values_new
-            else:
+            else:  # 将新的key和value添加到缓存中
                 self.cache_k = torch.cat([self.cache_k, keys_new], dim=1)
                 self.cache_v = torch.cat([self.cache_v, values_new], dim=1)
             keys, values = self.cache_k, self.cache_v
@@ -66,7 +66,7 @@ class MultiHeadAttention(nn.Module):
 
         # Transpose: (b, num_tokens, num_heads, head_dim) -> (b, num_heads, num_tokens, head_dim)
         keys = keys.transpose(1, 2)
-        queries = queries.transpose(1, 2)
+        queries = queries.transpose(1, 2)  # 使用kv cache时，queries中其实值包含一个token
         values = values.transpose(1, 2)
 
         # Compute scaled dot-product attention (aka self-attention) with a causal mask
@@ -102,7 +102,7 @@ class MultiHeadAttention(nn.Module):
         return context_vec
 
     ####################################################
-    # NEW
+    # NEW 重置缓存
     def reset_cache(self):
         self.cache_k, self.cache_v = None, None
         self.ptr_current_pos = 0
@@ -173,7 +173,7 @@ class TransformerBlock(nn.Module):
         # x = self.att(x)   # Shape [batch_size, num_tokens, emb_size]
         ####################################################
         # NEW
-        x = self.att(x, use_cache=use_cache)
+        x = self.att(x, use_cache=use_cache)  # 将use_cache传入
         ####################################################
 
         x = self.drop_shortcut(x)
@@ -197,7 +197,7 @@ class GPTModel(nn.Module):
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
 
         # self.trf_blocks = nn.Sequential(
-        #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])  # nn.Sequential 不支持传递额外参数，如use_cache
         ####################################################
         # NEW
         self.trf_blocks = nn.ModuleList(
@@ -213,12 +213,13 @@ class GPTModel(nn.Module):
         batch_size, seq_len = in_idx.shape
         tok_embeds = self.tok_emb(in_idx)
 
-        # pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))
+        # pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))  # 总是从0开始
 
         ####################################################
         # NEW
 
         if use_cache:
+            # 使用kv cache时，pos_ids从当前位置开始，并增加seq_len
             pos_ids = torch.arange(self.current_pos, self.current_pos + seq_len, device=in_idx.device, dtype=torch.long)
             self.current_pos += seq_len
         else:
@@ -241,7 +242,7 @@ class GPTModel(nn.Module):
         return logits
 
     ####################################################
-    # NEW
+    # NEW 重置缓存
     def reset_kv_cache(self):
         for blk in self.trf_blocks:
             blk.att.reset_cache()
@@ -288,7 +289,7 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
             model.reset_kv_cache()
             logits = model(idx[:, -ctx_len:], use_cache=True)
 
-            for _ in range(max_new_tokens):
+            for _ in range(max_new_tokens):  # 有kv cache时，每次只传入一个token
                 # a) pick the token with the highest log-probability (greedy sampling)
                 next_idx = logits[:, -1].argmax(dim=-1, keepdim=True)
                 # b) append it to the running sequence
@@ -296,7 +297,7 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
                 # c) feed model only the new token
                 logits = model(next_idx, use_cache=True)
         else:
-            for _ in range(max_new_tokens):
+            for _ in range(max_new_tokens):  # 没有kv cache时，每次都传入整个输入
                 logits = model(idx[:, -ctx_len:], use_cache=False)
                 next_idx = logits[:, -1].argmax(dim=-1, keepdim=True)
                 idx = torch.cat([idx, next_idx], dim=1)

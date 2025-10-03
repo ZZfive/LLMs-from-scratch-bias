@@ -29,10 +29,12 @@ class MultiHeadAttention(nn.Module):
         ####################################################
         # NEW
         self.max_seq_len = max_seq_len or context_length
-        self.window_size = window_size or self.max_seq_len
+        self.window_size = window_size or self.max_seq_len # 滑动窗口大小，用于限制缓存的大小
         self.register_buffer("cache_k", None, persistent=False)
         self.register_buffer("cache_v", None, persistent=False)
         ####################################################
+
+        # 去掉了mask buffer，改为动态计算；不再使用ptr_current_pos，改为局部变量ptr_cur
 
     def forward(self, x, use_cache=False):
         b, num_tokens, d_in = x.shape
@@ -55,6 +57,7 @@ class MultiHeadAttention(nn.Module):
         ####################################################
         # NEW
         if use_cache:
+            # 预分配固定大小的缓存，此处缓存长度为window_size
             if self.cache_k is None or self.cache_k.size(0) != b:
                 self.cache_k = torch.zeros(b, self.num_heads,
                                            self.window_size, self.head_dim,
@@ -62,18 +65,20 @@ class MultiHeadAttention(nn.Module):
                 self.cache_v = torch.zeros_like(self.cache_k)
                 self.ptr_cur = 0  # pointer to next free slot
 
-            # if incoming chunk would overflow discard oldest tokens
-            if self.ptr_cur + num_tokens > self.window_size:
+            # if incoming chunk would overflow discard oldest tokens  处理溢出：滑动窗口机制
+            if self.ptr_cur + num_tokens > self.window_size:  # 如果新传入的token会超过缓存大小，则丢弃最早的token
                 overflow = self.ptr_cur + num_tokens - self.window_size
-                # shift everything left by `overflow` (cheap view-copy)
+                # shift everything left by `overflow` (cheap view-copy)  左移数据，丢弃最旧的token
                 self.cache_k[:, :, :-overflow, :] = self.cache_k[:, :, overflow:, :].clone()
                 self.cache_v[:, :, :-overflow, :] = self.cache_v[:, :, overflow:, :].clone()
                 self.ptr_cur -= overflow  # pointer after shift
 
+            # 3. 原地更新缓存，无需分配新内存）
             self.cache_k[:, :, self.ptr_cur:self.ptr_cur + num_tokens, :] = keys_new
             self.cache_v[:, :, self.ptr_cur:self.ptr_cur + num_tokens, :] = values_new
             self.ptr_cur += num_tokens
 
+            # 4. 只使用有效的部分
             keys = self.cache_k[:, :, :self.ptr_cur, :]
             values = self.cache_v[:, :, :self.ptr_cur, :]
         else:
@@ -91,8 +96,8 @@ class MultiHeadAttention(nn.Module):
             # No cache → use the pre‑baked triangular mask slice
             causal_mask = torch.triu(torch.ones(num_tokens, K, device=x.device, dtype=torch.bool), diagonal=1)
         else:
-            # Cached: need to offset the diagonal by (K − num_tokens)
-            offset = K - num_tokens  # number of tokens already in cache before this chunk
+            # Cached: need to offset the diagonal by (K − num_tokens)  动态计算mask
+            offset = K - num_tokens  # number of tokens already in cache before this chunk  已缓存的tokens数量
             row_idx = torch.arange(num_tokens, device=x.device).unsqueeze(1)  # (num_tokens, 1)
             col_idx = torch.arange(K, device=x.device).unsqueeze(0)           # (1, K)
             causal_mask = row_idx + offset < col_idx                          # True where j > i+offset

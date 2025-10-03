@@ -267,7 +267,7 @@ cache_v = cache_v[:, :, -window_size:, :]
 &nbsp;
 #### 实践中的优化
 
-可以在[`gpt_with_kv_cache_optimized.py`](gpt_with_kv_cache_optimized.py)文件中找到这些优化。
+可以在[`gpt_with_kv_cache_optimized.py`](gpt_with_kv_cache_optimized.py)文件中找到这些优化；因为滑动窗口的设置，注意力计算操作只会窗口中的tokens间进行。
 
 在一台搭载M4芯片（CPU）的Mac Mini上，使用200个tokens的生成和与上下文长度相等的窗口大小（为确保结果一致），代码运行时间对比如下：
 
