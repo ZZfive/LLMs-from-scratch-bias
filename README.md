@@ -1,2 +1,2 @@
 # LLMs-from-scratch-bias
-目前github上已有不少[LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)的翻译repo，但基于想对整个llm构建过程重新熟悉的想法，本repo也会针对性的对LLMs-from-scratch内容进行反应，但我也会补充一些结合其他本人感兴趣的项目的内容，也算是私自添加一些补充材料吧，这也是本repo的名字为LLMs-from-scratch-bias的原因，因为项目内容带有我个人的偏置。
+目前github上已有不少[LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)的翻译repo，但基于想对整个llm构建过程重新熟悉的想法，本repo也会针对性的对LLMs-from-scratch内容进行翻译，但我也会补充一些结合其他本人感兴趣的项目内容，也算是私自添加一些补充材料吧，这也是本repo名为LLMs-from-scratch-bias的原因，因为项目内容带有我个人的偏置。
