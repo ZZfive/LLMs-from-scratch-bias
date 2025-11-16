@@ -1,4 +1,4 @@
-# Chapter 2: Working with Text Data
+# 第二章：处理文本数据
 
 ### 章节主要代码
 
