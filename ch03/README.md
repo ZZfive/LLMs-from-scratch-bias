@@ -1,4 +1,4 @@
-# Chapter 3: Coding Attention Mechanisms
+# 第三章：编码注意力机制
 
 &nbsp;
 ## 章节主要代码
@@ -9,7 +9,7 @@
 ## Bonus Materials
 
 - [02_bonus_efficient-multihead-attention](02_bonus_efficient-multihead-attention) 实现了不同变体的多头注意力机制，并进行了比较
-- [03_understanding-buffers](03_understanding-buffers) 解释了 PyTorch 缓冲区的概念，这是实现本章节因果注意力机制的关键
+- [03_understanding-buffers](03_understanding-buffers) 解释了PyTorch缓冲区的概念，这是实现本章节因果注意力机制的关键
 
 
 
