@@ -1,4 +1,4 @@
-# Understanding PyTorch Buffers
+# 理解PyTorch缓冲区
 
 - [understanding-buffers.ipynb](understanding-buffers.ipynb) 解释了 PyTorch 缓冲区的概念，用于实现第 3 章中的因果注意力机制
 
