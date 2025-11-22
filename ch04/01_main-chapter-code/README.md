@@ -1,4 +1,4 @@
-# Chapter 4: Implementing a GPT Model from Scratch To Generate Text
+# 第四章：从头实现一个GPT模型生成文本
 
 ### Main Chapter Code
 
