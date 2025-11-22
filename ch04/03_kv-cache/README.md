@@ -1,6 +1,6 @@
 # 附加材料：KV Cache
 
-**这个文件夹实现了在 GPT 模型中添加 KV 缓存。**
+**这个文件夹实现了在GPT模型中添加KV缓存。**
 
 &nbsp;
 ## 概述
@@ -15,11 +15,11 @@
 
 <img src="https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/kv-cache/kv-cache-attn-1.png?3" width=800>
 
-现在，正如在第2章和第4章中所学，LLMs每次生成一个词（或标记）。假设LLM生成了单词"fast"，那么下一轮的提示就变成了"Time flies fast"。这在下面的下一个图中进行了说明：
+现在，正如在第2章和第4章中所学，LLMs每次生成一个词（或token）。假设LLM生成了单词"fast"，那么下一轮的提示就变成了"Time flies fast"。这在下面的下一个图中进行了说明：
 
 <img src="https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/kv-cache/kv-cache-attn-2.png?3" width=800>
 
-如图所示，通过比较前两个图，可以发现前两个token的keys和value向量完全相同，在每次下一个token的文本生成轮次中重新计算它们是浪费的。
+如图所示，通过比较前两个图，可以发现前两个token的key和value向量完全相同，在每次下一个token的文本生成轮次中重新计算它们是浪费的。
 
 因此，KV缓存的思路是实现一种缓存机制，存储先前生成的键和值向量以便重用，这有助于避免不必要的重复计算。
 
