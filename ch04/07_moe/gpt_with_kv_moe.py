@@ -187,7 +187,7 @@ class MoEFeedForward(nn.Module):
         # x: (batch, seq_len, emb_dim)
         scores = self.gate(x)  # (b, seq_len, num_experts)
         topk_scores, topk_indices = torch.topk(scores, self.num_experts_per_tok, dim=-1)
-        topk_probs = torch.softmax(topk_scores, dim=-1)
+        topk_probs = torch.softmax(topk_scores, dim=-1)  # 计算路由权重
 
         batch, seq_len, _ = x.shape
         x_flat = x.reshape(batch * seq_len, -1)
@@ -201,16 +201,16 @@ class MoEFeedForward(nn.Module):
         for expert_id_tensor in unique_experts:
             expert_id = int(expert_id_tensor.item())
 
-            mask = topk_indices_flat == expert_id
-            if not mask.any():
+            mask = topk_indices_flat == expert_id  # 判断所有token是否被分配给expert_id对应的专家
+            if not mask.any():  # 如果所有token都没有被分配给expert_id对应的专家，则跳过
                 continue
 
-            token_mask = mask.any(dim=-1)
-            selected_idx = token_mask.nonzero(as_tuple=False).squeeze(-1)
-            if selected_idx.numel() == 0:
+            token_mask = mask.any(dim=-1)  # 判断是否有token被分配给expert_id对应的专家
+            selected_idx = token_mask.nonzero(as_tuple=False).squeeze(-1)  # 获取被分配给expert_id对应的专家的token索引
+            if selected_idx.numel() == 0:  # 如果没有任何token被分配给expert_id对应的专家，则跳过
                 continue
 
-            expert_input = x_flat.index_select(0, selected_idx)
+            expert_input = x_flat.index_select(0, selected_idx)  # 获取被分配给expert_id对应的专家的token输入
             hidden = torch.nn.functional.silu(self.fc1[expert_id](expert_input)) * self.fc2[
                 expert_id
             ](expert_input)
@@ -220,9 +220,9 @@ class MoEFeedForward(nn.Module):
             slot_indices = mask_selected.int().argmax(dim=-1, keepdim=True)
             selected_probs = torch.gather(
                 topk_probs_flat.index_select(0, selected_idx), dim=-1, index=slot_indices
-            ).squeeze(-1)
+            ).squeeze(-1)  # 提取被分配给expert_id对应的专家的token的路由权重
 
-            out_flat.index_add_(0, selected_idx, expert_out * selected_probs.unsqueeze(-1))
+            out_flat.index_add_(0, selected_idx, expert_out * selected_probs.unsqueeze(-1))  # 加权累加到输出
 
         return out_flat.reshape(batch, seq_len, self.emb_dim)
 

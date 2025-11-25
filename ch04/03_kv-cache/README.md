@@ -49,11 +49,11 @@ b. 使用文件差异工具查看两个代码文件，以比较更改：
 &nbsp;
 ### 1.注册Cache缓冲区
 
-在`MultiHeadAttention`构造函数内部，添加两个非持久性缓冲区`cache_k`和`cache_v`，它们将跨步骤存储连接的键和值：
+在`MultiHeadAttention`构造函数内部，添加两个性缓冲区`cache_k`和`cache_v`，它们将跨步骤存储连接的键和值：
 
 ```python
-self.register_buffer("cache_k", None, persistent=False)
-self.register_buffer("cache_v", None, persistent=False)
+self.register_buffer("cache_k", None)
+self.register_buffer("cache_v", None)
 ```
 
 &nbsp;
