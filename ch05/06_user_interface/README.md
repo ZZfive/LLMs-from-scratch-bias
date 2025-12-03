@@ -4,7 +4,7 @@
 
 ![Chainlit UI example](https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/chainlit/chainlit-orig.webp)
 
-要实现这个用户界面，我们使用开源的[Chainlit](https://github.com/Chainlit/chainlit)Python包。
+要实现这个用户界面，使用开源的[Chainlit](https://github.com/Chainlit/chainlit)Python包。
 
 &nbsp;
 ## 步骤1: 安装依赖

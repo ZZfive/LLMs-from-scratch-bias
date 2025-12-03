@@ -1,4 +1,4 @@
-# Alternative Approaches to Loading Pretrained Weights
+# 预训练模型加载的替代方案
 
 此路径包含备用的权重加载策略，以防权重从OpenAI下载的权重不可用。
 

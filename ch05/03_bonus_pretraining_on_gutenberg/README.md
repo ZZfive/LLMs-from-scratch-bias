@@ -4,7 +4,7 @@
 
 正如Project Gutenberg网站所说，“绝大多数Project Gutenberg电子书在美国属于公共领域。”
 
-请查阅[Project Gutenberg 的权限、许可及其他常见请求页面](https://www.gutenberg.org/policy/permission.html)，以获取更多关于使用 Project Gutenberg 提供的资源的信息。
+请查阅[Project Gutenberg 的权限、许可及其他常见请求页面](https://www.gutenberg.org/policy/permission.html)，以获取更多关于使用Project Gutenberg提供的资源的信息。
 
 &nbsp;
 ## 如何使用这个代码
