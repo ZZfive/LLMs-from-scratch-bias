@@ -16,7 +16,7 @@
 
 **请注意，这些优化将训练速度从12,525 tokens/秒（单个A100）提升到142,156 tokens/秒（单个A100）和419,259 tokens/秒（4个A100）。**
 
-我计划在未来某个时候更详细地阐述这些差异。目前，查看代码改进的最简单方法是在Visual Studio Code中打开文件并通过"比较所选内容"功能查看差异。
+计划在未来某个时候更详细地阐述这些差异。目前，查看代码改进的最简单方法是在Visual Studio Code中打开文件并通过"比较所选内容"功能查看差异。
 
 ![VS compare](https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/llm-training-speed/vs-code-compare.png)
 
@@ -26,7 +26,7 @@
 &nbsp;
 ## 单GPU速度比较
 
-如上所述，我计划在未来更详细地阐述这些更改。目前，此部分包含每个修改以tokens/秒为单位的简单性能概览。所有实验均在A100 GPU上运行。
+如上所述，计划在未来更详细地阐述这些更改。目前，此部分包含每个修改以tokens/秒为单位的简单性能概览。所有实验均在A100 GPU上运行。
 
 &nbsp;
 ### 基线
@@ -121,7 +121,7 @@ Reserved memory: 26.2617 GB
 &nbsp;
 ### 5. 使用bfloat16精度
 
-- 从32位浮点数切换到16位脑浮点数（bfloat16）精度（有关此主题的更多信息，请参阅[我的文章](https://magazine.sebastianraschka.com/p/the-missing-bits-llama-2-weights)）
+- 从32位浮点数切换到16位脑浮点数（bfloat16）精度（有关此主题的更多信息，请参阅[文章](https://magazine.sebastianraschka.com/p/the-missing-bits-llama-2-weights)）
 
 之前：
 - `Avg tok/sec: 28402`
@@ -147,7 +147,7 @@ Reserved memory: 26.2617 GB
 &nbsp;
 ### 7. 使用FlashAttention
 
-- 使用PyTorch的自注意力函数和FlashAttention，而不是我们的从零开始的多头注意力实现。
+- 使用PyTorch的自注意力函数和FlashAttention，而不是从零开始的多头注意力实现。
 
 之前：
 - `Avg tok/sec: 55256`
@@ -160,7 +160,7 @@ Reserved memory: 26.2617 GB
 &nbsp;
 ### 8. 使用`pytorch.compile`
 
-- 使用`torch.compile(model)`。请注意，在加速之前第一次迭代总是较慢。由于`Avg tok/sec`测量仅包含平均计算的第一行，我们现在使用第1个epoch结束时的`Step tok/sec`。
+- 使用`torch.compile(model)`。请注意，在加速之前第一次迭代总是较慢。由于`Avg tok/sec`测量仅包含平均计算的第一行，现在使用第1个epoch结束时的`Step tok/sec`。
 
 之前：
 - `Avg tok/sec: 91901`
@@ -179,19 +179,19 @@ Reserved memory: 26.2617 GB
 - 在Windows上编译可能比较棘手
 - `torch.compile()`使用Inductor，它JIT编译内核并需要有效的C/C++工具链
 - 对于CUDA，Inductor还依赖Triton，可通过社区包`triton-windows`获得
-  - 如果您看到`cl not found`，[安装带有"C++工作负载"的Visual Studio Build Tools](https://learn.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170)并从"x64本机工具"提示运行Python
-  - 如果您看到`triton not found`且使用CUDA，安装`triton-windows`（例如，`uv pip install "triton-windows<3.4"`）。
+  - 如果看到`cl not found`，[安装带有"C++工作负载"的Visual Studio Build Tools](https://learn.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170)并从"x64本机工具"提示运行Python
+  - 如果看到`triton not found`且使用CUDA，安装`triton-windows`（例如，`uv pip install "triton-windows<3.4"`）。
 - 对于CPU，读者进一步推荐遵循此[Windows的PyTorch Inductor指南](https://docs.pytorch.org/tutorials/unstable/inductor_windows.html)
   - 这里，重要的是在安装Visual Studio 2022时安装英语语言包以避免UTF-8错误
-  - 此外，请注意代码需要通过"Visual Studio 2022开发人员命令提示符"运行，而不是通过笔记本运行
-- 如果此设置证明棘手，您可以跳过编译；**编译是可选的，所有代码示例不使用它也能正常工作**
+  - 此外，请注意代码需要通过"Visual Studio 2022开发人员命令提示符"运行，而不是通过notebook运行
+- 如果此设置证明棘手，可以跳过编译；**编译是可选的，所有代码示例不使用它也能正常工作**
 
 ---
 
 &nbsp;
 ### 9. 词汇表填充
 
-- 这里，我们将词汇表大小从50,257略微增加到50,304，这是64的最近倍数。这个技巧是我的前同事Carlos Mocholi建议我的，他提到这最初来自Andrej Karpathy（可能来自[这个帖子](https://x.com/karpathy/status/1621578354024677377)）。Karpathy的建议基于与PyTorch团队的互动，他们对`torch.compile`给出了建议，如[Bertrand Maher](https://www.linkedin.com/feed/update/urn:li:activity:7309569006057795584?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7309569006057795584%2C7309754284185669632%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287309754284185669632%2Curn%3Ali%3Aactivity%3A7309569006057795584%29)所提及。对此的一个好资源是[NVIDIA关于张量形状的指南](https://docs.nvidia.com/deeplearning/performance/mixed-precision-training/index.html#tensor-core-shape)，其中批大小和线性层维度通常选择为某些值的倍数。此外，NVIDIA的Megatron团队很久以前就描述了词汇表填充技巧（参见2019年[Megatron-LM:使用模型并行训练多十亿参数语言模型](https://arxiv.org/abs/1909.08053)论文）。
+- 这里，将词汇表大小从50,257略微增加到50,304，这是64的最近倍数。这个技巧是作者的前同事Carlos Mocholi建议，他提到这最初来自Andrej Karpathy（可能来自[这个帖子](https://x.com/karpathy/status/1621578354024677377)）。Karpathy的建议基于与PyTorch团队的互动，他们对`torch.compile`给出了建议，如[Bertrand Maher](https://www.linkedin.com/feed/update/urn:li:activity:7309569006057795584?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7309569006057795584%2C7309754284185669632%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287309754284185669632%2Curn%3Ali%3Aactivity%3A7309569006057795584%29)所提及。对此的一个好资源是[NVIDIA关于张量形状的指南](https://docs.nvidia.com/deeplearning/performance/mixed-precision-training/index.html#tensor-core-shape)，其中批大小和线性层维度通常选择为某些值的倍数。此外，NVIDIA的Megatron团队很久以前就描述了词汇表填充技巧（参见2019年[Megatron-LM:使用模型并行训练多十亿参数语言模型](https://arxiv.org/abs/1909.08053)论文）。
 
 之前：
 - `Step tok/sec: 112046`
@@ -204,7 +204,7 @@ Reserved memory: 26.2617 GB
 &nbsp;
 ### 10. 增加批大小
 
-- 最后，我们将批大小增加到GPU支持的最大2的幂
+- 最后，将批大小增加到GPU支持的最大2的幂
 
 之前：
 - `Step tok/sec: 127345`
@@ -218,7 +218,7 @@ Reserved memory: 26.2617 GB
 &nbsp;
 ## 多GPU速度比较
 
-这可能不是一个完全公平的比较，因为我们现在使用4个GPU而不是1个，但使用分布式数据并行（如果训练不受有限GPU内存瓶颈限制，这是可用的最快多GPU技术），当然可以带来明显的加速：
+这可能不是一个完全公平的比较，因为现在使用4个GPU而不是1个，但使用分布式数据并行（如果训练不受有限GPU内存瓶颈限制，这是可用的最快多GPU技术），当然可以带来明显的加速：
 
 之前（单GPU）：
 - `Step tok/sec: 142156`
