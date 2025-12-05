@@ -18,7 +18,7 @@
 3. [standalone-qwen3-moe.ipynb](standalone-qwen3-moe.ipynb)：像第一个笔记本一样，但是专家混合（MoE）变体
 4. [standalone-qwen3-moe-plus-kvcache.ipynb](standalone-qwen3-moe-plus-kvcache.ipynb)：与上面相同，但带有KV缓存以提高推理效率
 
-另外，我还将代码组织成Python包[这里](../../pkg/llms_from_scratch/)（包括单元测试和CI），您可以按照下面描述的方式运行。
+另外，还将代码组织成Python包[这里](../../pkg/llms_from_scratch/)（包括单元测试和CI），可以按照下面描述的方式运行。
 
 &nbsp;
 # 训练
@@ -28,7 +28,7 @@
 &nbsp;
 # 通过`llms-from-scratch`包使用Qwen3
 
-为了便于使用Qwen3从零开始的实现，您还可以使用基于此仓库源代码的`llms-from-scratch` PyPI包，位于[pkg/llms_from_scratch](../../pkg/llms_from_scratch)。
+为了便于使用Qwen3从零开始的实现，还可以使用基于此仓库源代码的`llms-from-scratch` PyPI包，位于[pkg/llms_from_scratch](../../pkg/llms_from_scratch)。
 
 &nbsp;
 #### 1) 安装
@@ -206,7 +206,7 @@ tokenizer = Qwen3Tokenizer(
 
 #### 5) 生成文本
 
-最后，我们可以通过以下代码生成文本：
+最后，可以通过以下代码生成文本：
 
 ```python
 prompt = "Give me a short introduction to large language models."
@@ -266,7 +266,7 @@ Large language models (LLMs) are advanced artificial intelligence systems design
 
 
 
-对于更大的模型，您可能更喜欢流式变体，它会在生成后立即打印每个token：
+对于更大的模型，可能更喜欢流式变体，它会在生成后立即打印每个token：
 
 ```python
 from llms_from_scratch.generate import generate_text_simple_stream
@@ -325,7 +325,7 @@ model = torch.compile(model)
 &nbsp;
 #### 专业技巧2：通过KV缓存加速推理
 
-在CPU上运行模型时，您可以使用KV缓存`Qwen3Model`即插即用替换来显著提升推理性能。（有关KV缓存的更多信息，请参阅我的文章[从零理解和编码LLM中的KV缓存](https://magazine.sebastianraschka.com/p/coding-the-kv-cache-in-llms)。）
+在CPU上运行模型时，可以使用KV缓存`Qwen3Model`即插即用替换来显著提升推理性能。（有关KV缓存的更多信息，请参阅我的文章[从零理解和编码LLM中的KV缓存](https://magazine.sebastianraschka.com/p/coding-the-kv-cache-in-llms)。）
 
 ```python
 from llms_from_scratch.kv_cache.qwen3 import Qwen3Model
@@ -367,7 +367,7 @@ token_ids = generate_text_simple(
 
 #### 专业技巧3：批处理推理
 
-我们可以通过批处理推理进一步增加吞吐量。虽然这不是一个完全可比较的对比，因为我们现在使用更多的输入序列运行推理，这增加了每秒钟的tokens吞吐量，但同时以增加内存使用量为代价。
+可以通过批处理推理进一步增加吞吐量。虽然这不是一个完全可比较的对比，因为现在使用更多的输入序列运行推理，这增加了每秒钟的tokens吞吐量，但同时以增加内存使用量为代价。
 
 这只需要对准备提示进行小的代码修改。例如，考虑下面这个批处理提示：
 

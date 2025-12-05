@@ -10,18 +10,18 @@
 
 
 
-为了实现此用户界面，我们使用开源的[Chainlit Python包](https://github.com/Chainlit/chainlit)。
+为了实现此用户界面，使用开源的[Chainlit Python包](https://github.com/Chainlit/chainlit)。
 
 &nbsp;
 ## 步骤1：安装依赖
 
-首先，我们通过以下方式安装`chainlit`包和[requirements-extra.txt](requirements-extra.txt)列表中的依赖
+首先，通过以下方式安装`chainlit`包和[requirements-extra.txt](requirements-extra.txt)列表中的依赖
 
 ```bash
 pip install -r requirements-extra.txt
 ```
 
-或者，如果您正在使用`uv`：
+或者，如果使用`uv`：
 
 ```bash
 uv pip install -r requirements-extra.txt
@@ -46,10 +46,10 @@ uv pip install -r requirements-extra.txt
 chainlit run qwen3-chat-interface.py
 ```
 
-或者，如果您正在使用`uv`：
+或者，如果使用`uv`：
 
 ```bash
 uv run chainlit run qwen3-chat-interface.py
 ```
 
-运行上述命令之一应该会打开一个新的浏览器选项卡，您可以在其中与模型交互。如果浏览器选项卡没有自动打开，请检查终端命令并将本地地址复制到浏览器地址栏中（通常，地址是`http://localhost:8000`）。
+运行上述命令之一应该会打开一个新的浏览器选项卡，可以在其中与模型交互。如果浏览器选项卡没有自动打开，请检查终端命令并将本地地址复制到浏览器地址栏中（通常，地址是`http://localhost:8000`）。
