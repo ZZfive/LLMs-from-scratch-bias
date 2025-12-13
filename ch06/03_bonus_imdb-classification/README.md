@@ -2,7 +2,7 @@
 
 ## 概述
 
-此文件夹包含额外的实验，用于将第6章中的（解码器风格）GPT-2 (2018)模型与编码器风格的LLM如[BERT (2018)](https://arxiv.org/abs/1810.04805)、[RoBERTa (2019)](https://arxiv.org/abs/1907.11692)和[ModernBERT (2024)](https://arxiv.org/abs/2412.13663)进行比较。我们没有使用第6章中的小型垃圾邮件数据集，而是使用了来自IMDb的5万条电影评论数据集（[数据集来源](https://ai.stanford.edu/~amaas/data/sentiment/)），目标是二元分类，预测评论者是否喜欢这部电影。这是一个平衡的数据集，所以随机预测应该达到50%的准确率。
+此文件夹包含额外的实验，用于将第6章中的（解码器风格）GPT-2 (2018)模型与编码器风格的LLM如[BERT (2018)](https://arxiv.org/abs/1810.04805)、[RoBERTa (2019)](https://arxiv.org/abs/1907.11692)和[ModernBERT (2024)](https://arxiv.org/abs/2412.13663)进行比较。没有使用第6章中的小型垃圾邮件数据集，而是使用了来自IMDb的5万条电影评论数据集（[数据集来源](https://ai.stanford.edu/~amaas/data/sentiment/)），目标是二元分类，预测评论者是否喜欢这部电影。这是一个平衡的数据集，所以随机预测应该达到50%的准确率。
 
 
 
@@ -115,7 +115,7 @@ Test accuracy: 90.89%
 &nbsp;
 ### 3) 66M DistilBERT
 
-一个6600万参数的编码器风格[DistilBERT](https://arxiv.org/abs/1910.01108)模型（从3.4亿参数的BERT模型蒸馏而来），从预训练权重开始，只训练最后一个Transformer块和输出层：
+一个6.6亿参数的编码器风格[DistilBERT](https://arxiv.org/abs/1910.01108)模型（从3.4亿参数的BERT模型蒸馏而来），从预训练权重开始，只训练最后一个Transformer块和输出层：
 
 
 
