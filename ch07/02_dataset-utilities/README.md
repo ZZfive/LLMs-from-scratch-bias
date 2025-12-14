@@ -60,7 +60,7 @@ Duplicate pair found with similarity 1.00:
 ```
 
 &nbsp;
-你可以使用`--threshold`设置，值在0到1之间，以降低或增加敏感性。
+可以使用`--threshold`设置，值在0到1之间，以降低或增加敏感性。
 默认阈值为0.9。
 
 
@@ -68,7 +68,7 @@ Duplicate pair found with similarity 1.00:
 &nbsp;
 ## 创建被动语态条目
 
- - [create-passive-voice-entries.ipynb](create-passive-voice-entries.ipynb)笔记本使用OpenAI的GPT-4为指令数据集创建"被动语态"条目，如下例所示
+ - [create-passive-voice-entries.ipynb](create-passive-voice-entries.ipynb)使用OpenAI的GPT-4为指令数据集创建"被动语态"条目，如下例所示
 
  ```python
  {

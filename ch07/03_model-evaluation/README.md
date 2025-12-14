@@ -8,7 +8,7 @@
 ## 使用OpenAI API评估指令响应
 
 
-- [llm-instruction-eval-openai.ipynb](llm-instruction-eval-openai.ipynb)笔记本使用OpenAI的GPT-4来评估指令微调模型生成的响应。它使用以下格式的JSON文件：
+- [llm-instruction-eval-openai.ipynb](llm-instruction-eval-openai.ipynb)使用OpenAI的GPT-4来评估指令微调模型生成的响应。它使用以下格式的JSON文件：
 
 ```python
 {
@@ -23,4 +23,4 @@
 &nbsp;
 ## 使用Ollama本地评估指令响应
 
-- [llm-instruction-eval-ollama.ipynb](llm-instruction-eval-ollama.ipynb)笔记本提供了上述的替代方案，通过Ollama使用本地下载的Llama 3模型。
+- [llm-instruction-eval-ollama.ipynb](llm-instruction-eval-ollama.ipynb)提供了上述的替代方案，通过Ollama使用本地下载的Llama 3模型。
