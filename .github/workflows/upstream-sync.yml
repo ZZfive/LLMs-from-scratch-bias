@@ -1,0 +1,235 @@
+name: Upstream Sync
+
+on:
+  schedule:
+    - cron: "17 2 */3 * *"
+  workflow_dispatch:
+    inputs:
+      force_full_resync:
+        description: "Rebuild all supported upstream Markdown and notebook files."
+        required: false
+        default: false
+        type: boolean
+      target_ref:
+        description: "Upstream ref to track."
+        required: false
+        default: "main"
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      DEFAULT_BRANCH: main
+      AUTOMATION_BRANCH: bot/upstream-sync
+      UPSTREAM_URL: https://github.com/rasbt/LLMs-from-scratch.git
+      TARGET_REF: ${{ inputs.target_ref || 'main' }}
+      FORCE_FULL_RESYNC: ${{ inputs.force_full_resync || false }}
+      TRANSLATION_API_KEY: ${{ secrets.TRANSLATION_API_KEY }}
+      TRANSLATION_BASE_URL: ${{ secrets.TRANSLATION_BASE_URL }}
+      TRANSLATION_MODEL: ${{ vars.TRANSLATION_MODEL }}
+      TRANSLATION_TIMEOUT_SECONDS: ${{ vars.TRANSLATION_TIMEOUT_SECONDS || '120' }}
+      MAX_CHANGED_FILES_PER_RUN: ${{ vars.MAX_CHANGED_FILES_PER_RUN || '25' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prepare upstream remote
+        shell: bash
+        run: |
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream "$UPSTREAM_URL"
+          else
+            git remote add upstream "$UPSTREAM_URL"
+          fi
+
+      - name: Run upstream sync
+        id: sync
+        continue-on-error: true
+        shell: bash
+        run: |
+          python tools/llms_sync/main.py sync \
+            --upstream-url "$UPSTREAM_URL" \
+            --target-ref "$TARGET_REF" \
+            --default-branch "$DEFAULT_BRANCH" \
+            --automation-branch "$AUTOMATION_BRANCH" \
+            --force-full-resync "$FORCE_FULL_RESYNC" \
+            --state-path ".sync/state.json" \
+            --manifest-path ".sync/managed_manifest.json" \
+            --reports-dir ".sync/reports" \
+            --runtime-dir ".sync/runtime"
+
+      - name: Load sync result
+        id: result
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(".sync/runtime/result.json")
+          data = {}
+          if path.exists():
+              data = json.loads(path.read_text(encoding="utf-8"))
+
+          outputs = {
+              "status": data.get("status", "missing"),
+              "has_changes": str(data.get("has_changes", False)).lower(),
+              "bootstrap_only": str(data.get("bootstrap_only", False)).lower(),
+              "report_path": data.get("report_path", ""),
+              "pr_title": data.get("pr_title", ""),
+              "pr_body_path": data.get("pr_body_path", ""),
+              "failure_body_path": data.get("failure_body_path", ""),
+          }
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              for key, value in outputs.items():
+                  handle.write(f"{key}={value}\n")
+          PY
+
+      - name: Publish workflow summary
+        if: always() && steps.result.outputs.report_path != ''
+        shell: bash
+        run: cat "${{ steps.result.outputs.report_path }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish failure summary
+        if: always() && steps.result.outputs.status == 'failure' && steps.result.outputs.failure_body_path != ''
+        shell: bash
+        run: cat "${{ steps.result.outputs.failure_body_path }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create or update sync pull request
+        if: steps.result.outputs.status == 'success' && steps.result.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ env.AUTOMATION_BRANCH }}
+          base: ${{ env.DEFAULT_BRANCH }}
+          commit-message: "chore(sync): update translated upstream content"
+          title: ${{ steps.result.outputs.pr_title }}
+          body-path: ${{ steps.result.outputs.pr_body_path }}
+          delete-branch: false
+
+      - name: Comment on existing sync pull request after failure
+        if: steps.result.outputs.status == 'failure'
+        uses: actions/github-script@v7
+        env:
+          FAILURE_BODY_PATH: ${{ steps.result.outputs.failure_body_path }}
+          AUTOMATION_BRANCH: ${{ env.AUTOMATION_BRANCH }}
+        with:
+          script: |
+            const fs = require("fs");
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const bodyPath = process.env.FAILURE_BODY_PATH;
+            const body = bodyPath && fs.existsSync(bodyPath)
+              ? fs.readFileSync(bodyPath, "utf8")
+              : "Upstream sync failed, but no failure summary was generated.";
+
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              head: `${owner}:${process.env.AUTOMATION_BRANCH}`,
+              per_page: 100,
+            });
+
+            if (pulls.length > 0) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pulls[0].number,
+                body,
+              });
+            }
+
+      - name: Create or update failure issue
+        if: steps.result.outputs.status == 'failure'
+        uses: actions/github-script@v7
+        env:
+          FAILURE_BODY_PATH: ${{ steps.result.outputs.failure_body_path }}
+        with:
+          script: |
+            const fs = require("fs");
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = "bot: translation sync failure";
+            const bodyPath = process.env.FAILURE_BODY_PATH;
+            const body = bodyPath && fs.existsSync(bodyPath)
+              ? fs.readFileSync(bodyPath, "utf8")
+              : "Upstream sync failed, but no failure summary was generated.";
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+
+            const existing = issues.find((issue) => !issue.pull_request && issue.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+              });
+            }
+
+      - name: Close failure issue after successful recovery
+        if: steps.result.outputs.status == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = "bot: translation sync failure";
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+
+            const existing = issues.find((issue) => !issue.pull_request && issue.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: "The latest upstream sync completed successfully. Closing this alert.",
+              });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                state: "closed",
+              });
+            }
+
+      - name: Fail workflow after notifications
+        if: steps.result.outputs.status == 'failure'
+        shell: bash
+        run: exit 1

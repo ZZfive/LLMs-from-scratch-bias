@@ -209,6 +209,9 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Automation runtime files
+.sync/runtime/
+
 # IPython
 profile_default/
 ipython_config.py
