@@ -17,27 +17,27 @@ DTYPE_BYTES = {
 }
 
 
-def bytes_convert(n):
+def convert_bytes(n):
     gb = n / (1000 ** 3)
     return f"{gb:,.2f} GB"
 
 
-def kv_bytes_total(batch, context_length, emb_dim, n_heads,
-                   n_kv_heads, n_layers, bytes_per_elem):
+def calc_kv_bytes_total(batch, context_length, emb_dim, n_heads,
+                             n_kv_heads, n_layers, bytes_per_elem):
     # Generic KV-cache: per-head dim is embed_dim / n_heads, times 2 for K and V
     head_dim = math.ceil(emb_dim / n_heads)
     per_layer = batch * context_length * head_dim * n_kv_heads * 2 * bytes_per_elem
     return per_layer * n_layers
 
 
-def mla_bytes_total(batch, context_length, n_layers, latent_dim, bytes_per_elem):
+def calc_mla_bytes_total(batch, context_length, n_layers, latent_dim, bytes_per_elem):
     # Simple MLA (per-token compressed latent)
     # bytes ≈ batch × seqlen × n_layers × latent_dim × bytes_per_elem
     return batch * context_length * n_layers * latent_dim * bytes_per_elem
 
 
 def main():
-    p = argparse.ArgumentParser(description="Estimate KV-cache memory for MHA vs GQA vs MLA")
+    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Estimate KV-cache memory for MHA vs GQA vs MLA")
     p.add_argument("--context_length", default=1024, type=int)
     p.add_argument("--emb_dim", required=True, type=int)
     p.add_argument("--n_heads", required=True, type=int)
@@ -66,7 +66,7 @@ def main():
     n_kv_heads_mha = cfg["n_heads"]
     n_kv_heads_gqa = cfg["n_heads"] // cfg["n_kv_groups"]
 
-    total_mha = kv_bytes_total(
+    total_mha = calc_kv_bytes_total(
         args.batch_size,
         cfg["context_length"],
         cfg["emb_dim"],
@@ -76,7 +76,7 @@ def main():
         bytes_per_elem,
     )
 
-    total_gqa = kv_bytes_total(
+    total_gqa = calc_kv_bytes_total(
         args.batch_size,
         cfg["context_length"],
         cfg["emb_dim"],
@@ -86,7 +86,7 @@ def main():
         bytes_per_elem,
     )
 
-    total_mla = mla_bytes_total(
+    total_mla = calc_mla_bytes_total(
         args.batch_size,
         cfg["context_length"],
         cfg["n_layers"],
@@ -110,9 +110,9 @@ def main():
     print()
 
     print("==== KV-cache totals across all layers ====")
-    print(f"MHA total KV cache  : {bytes_convert(total_mha)}")
-    print(f"GQA total KV cache  : {bytes_convert(total_gqa)}")
-    print(f"MLA total KV cache  : {bytes_convert(total_mla)}")
+    print(f"MHA total KV cache  : {convert_bytes(total_mha)}")
+    print(f"GQA total KV cache  : {convert_bytes(total_gqa)}")
+    print(f"MLA total KV cache  : {convert_bytes(total_mla)}")
     print(f"Ratio (MHA / GQA)   : {ratio:,.2f}x")
     print(f"Savings (GQA vs MHA): {savings*100:,.2f}%")
     print(f"Ratio (MHA / MLA)   : {ratio_mha_mla:,.2f}x")
