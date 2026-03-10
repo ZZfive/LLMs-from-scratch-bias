@@ -7,14 +7,13 @@ import importlib
 from pathlib import Path
 
 import torch
-
 from llms_from_scratch.utils import import_definitions_from_notebook
 
 try:
-    from transformers import Olmo3Config, Olmo3ForCausalLM
+    from transformers import Cohere2Config, Cohere2ForCausalLM
 except ImportError:
-    Olmo3Config = None
-    Olmo3ForCausalLM = None
+    Cohere2Config = None
+    Cohere2ForCausalLM = None
 
 
 def tiny_debug_config():
@@ -26,114 +25,65 @@ def tiny_debug_config():
         "n_layers": 2,
         "hidden_dim": 64,
         "head_dim": 8,
-        "qk_norm": True,
         "n_kv_heads": 2,
         "sliding_window": 4,
-        "layer_types": ["full_attention", "full_attention"],
+        "layer_types": ["sliding_attention", "full_attention"],
         "dtype": torch.float32,
-        "query_pre_attn_scalar": 256,
         "attention_bias": False,
-        "rms_norm_eps": 1e-6,
-        "rope_base": 1_000_000.0,
-        "rope_attention_factor": 1.0,
-        "rope_type": "default",
-        "rope_factor": 1.0,
-        "rope_orig_max": 8,
-        "rope_local_base": 10_000.0,
-    }
-
-
-def yarn_debug_config():
-    return {
-        "vocab_size": 257,
-        "context_length": 8,
-        "emb_dim": 32,
-        "n_heads": 4,
-        "n_layers": 2,
-        "hidden_dim": 64,
-        "head_dim": 8,
-        "qk_norm": True,
-        "n_kv_heads": 2,
-        "sliding_window": 4,
-        "layer_types": ["full_attention", "full_attention"],
-        "dtype": torch.float32,
-        "query_pre_attn_scalar": 256,
-        "attention_bias": False,
-        "rms_norm_eps": 1e-6,
-        "rope_base": 500_000.0,
-        "rope_attention_factor": 1.2079441541679836,
-        "rope_type": "yarn",
-        "rope_factor": 8.0,
-        "rope_orig_max": 8192,
-        "beta_fast": 32.0,
-        "beta_slow": 1.0,
-        "rope_local_base": 10_000.0,
+        "attention_dropout": 0.0,
+        "layer_norm_eps": 1e-5,
+        "rope_base": 10_000.0,
+        "logit_scale": 1.0,
+        "tie_word_embeddings": False,
     }
 
 
 def _hf_config_from_dict(cfg):
-    if Olmo3Config is None:
-        raise ImportError("transformers is required for the Olmo-3 debugger.")
+    if Cohere2Config is None:
+        raise ImportError("transformers is required for the Tiny Aya debugger.")
 
-    rope_type = cfg.get("rope_type", "default")
-    rope_scaling = {"rope_type": rope_type}
-    if rope_type == "yarn":
-        rope_scaling.update(
-            {
-                "attention_factor": cfg.get("rope_attention_factor", 1.0),
-                "beta_fast": cfg.get("beta_fast", 32.0),
-                "beta_slow": cfg.get("beta_slow", 1.0),
-                "factor": cfg.get("rope_factor", 1.0),
-                "original_max_position_embeddings": cfg.get("rope_orig_max", 8192),
-            }
-        )
-
-    return Olmo3Config(
+    return Cohere2Config(
         vocab_size=cfg["vocab_size"],
         max_position_embeddings=cfg["context_length"],
         hidden_size=cfg["emb_dim"],
         num_attention_heads=cfg["n_heads"],
         num_hidden_layers=cfg["n_layers"],
         intermediate_size=cfg["hidden_dim"],
-        head_dim=cfg["head_dim"],
         num_key_value_heads=cfg["n_kv_heads"],
-        rope_theta=cfg["rope_base"],
-        rope_local_base_freq=cfg.get("rope_local_base", 10_000.0),
-        layer_types=cfg["layer_types"],
+        attention_bias=cfg["attention_bias"],
+        attention_dropout=cfg["attention_dropout"],
+        layer_norm_eps=cfg["layer_norm_eps"],
         sliding_window=cfg["sliding_window"],
-        tie_word_embeddings=False,
-        attn_implementation="eager",
+        layer_types=cfg["layer_types"],
+        logit_scale=cfg["logit_scale"],
+        tie_word_embeddings=cfg.get("tie_word_embeddings", False),
+        rope_parameters={"rope_type": "default", "rope_theta": cfg["rope_base"]},
         torch_dtype=cfg.get("dtype", torch.float32),
-        query_pre_attn_scalar=cfg.get("query_pre_attn_scalar", 256),
-        rope_scaling=rope_scaling,
-        qk_norm=cfg.get("qk_norm", False),
-        rms_norm_eps=cfg.get("rms_norm_eps", 1e-5),
     )
 
 
-def load_notebook_defs(nb_name="standalone-olmo3.ipynb"):
+def load_notebook_defs(nb_name="standalone-tiny-aya.ipynb"):
     nb_dir = Path(__file__).resolve().parents[1]
     return import_definitions_from_notebook(nb_dir, nb_name)
 
 
-def build_olmo3_pair(import_notebook_defs, cfg, hf_checkpoint=None):
-    if Olmo3ForCausalLM is None:
-        raise ImportError("transformers is required for the Olmo-3 debugger.")
+def build_tiny_aya_pair(import_notebook_defs, cfg, hf_checkpoint=None):
+    if Cohere2ForCausalLM is None:
+        raise ImportError("transformers is required for the Tiny Aya debugger.")
 
-    ours = import_notebook_defs.Olmo3Model(cfg)
+    ours = import_notebook_defs.TinyAyaModel(cfg)
     hf_cfg = _hf_config_from_dict(cfg)
 
     if hf_checkpoint:
-        hf_model = Olmo3ForCausalLM.from_pretrained(
+        hf_model = Cohere2ForCausalLM.from_pretrained(
             hf_checkpoint,
             torch_dtype=cfg.get("dtype", torch.float32),
             attn_implementation="eager",
         )
     else:
-        hf_model = Olmo3ForCausalLM(hf_cfg)
+        hf_model = Cohere2ForCausalLM(hf_cfg)
 
-    param_config = {"n_layers": cfg["n_layers"], "hidden_dim": cfg["hidden_dim"]}
-    import_notebook_defs.load_weights_into_olmo(ours, param_config, hf_model.state_dict())
+    import_notebook_defs.load_weights_into_tiny_aya(ours, cfg, hf_model.state_dict())
 
     ours.eval()
     hf_model.eval()
@@ -147,6 +97,7 @@ def _attach_debug_hooks(model, is_hf):
     def hook(name):
         def _record(_, __, output):
             traces[name] = output.detach().to(torch.float32).cpu()
+
         return _record
 
     if is_hf:
@@ -158,7 +109,12 @@ def _attach_debug_hooks(model, is_hf):
         handles.append(model.lm_head.register_forward_hook(hook("logits")))
     else:
         handles.append(model.tok_emb.register_forward_hook(hook("embedding")))
-        for idx, block in enumerate(model.blocks):
+        blocks = getattr(model, "trf_blocks", None)
+        if blocks is None:
+            blocks = getattr(model, "blocks", None)
+        if blocks is None:
+            raise AttributeError("Could not locate Tiny Aya blocks on the local model.")
+        for idx, block in enumerate(blocks):
             handles.append(block.register_forward_hook(hook(f"block_{idx}")))
         handles.append(model.final_norm.register_forward_hook(hook("final_norm")))
         handles.append(model.out_head.register_forward_hook(hook("logits")))
@@ -210,8 +166,7 @@ def layerwise_differences(ours, hf_model, input_ids, rtol=1e-5, atol=1e-5):
             )
             continue
 
-        shapes_match = ours_tensor.shape == hf_tensor.shape
-        if not shapes_match:
+        if ours_tensor.shape != hf_tensor.shape:
             results.append(
                 {
                     "name": name,
@@ -241,26 +196,15 @@ def layerwise_differences(ours, hf_model, input_ids, rtol=1e-5, atol=1e-5):
     return results
 
 
-def first_mismatch(differences):
-    for diff in differences:
-        if diff["status"] != "ok":
-            return diff
-    return None
-
-
 def format_report(differences):
     lines = []
     for diff in sorted(differences, key=lambda d: _layer_sort_key(d["name"])):
         if diff["status"] == "ok":
             lines.append(f"[OK] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}")
         elif diff["status"] == "mismatch":
-            lines.append(
-                f"[DIFF] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}"
-            )
+            lines.append(f"[DIFF] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}")
         elif diff["status"] == "shape_mismatch":
-            lines.append(
-                f"[SHAPE] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}"
-            )
+            lines.append(f"[SHAPE] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}")
         else:
             lines.append(f"[MISSING] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}")
     return "\n".join(lines)
@@ -272,9 +216,9 @@ if __name__ == "__main__":
         raise SystemExit("transformers is not installed; install it to run the debugger.")
 
     import_notebook_defs = load_notebook_defs()
-    cfg = yarn_debug_config()
+    cfg = tiny_debug_config()
 
-    ours_model, hf_model = build_olmo3_pair(import_notebook_defs, cfg)
+    ours_model, hf_model = build_tiny_aya_pair(import_notebook_defs, cfg)
     torch.manual_seed(0)
     input_ids = torch.randint(0, cfg["vocab_size"], (1, cfg["context_length"]), dtype=torch.long)
     diffs = layerwise_differences(ours_model, hf_model, input_ids)
