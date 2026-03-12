@@ -1,34 +1,34 @@
-# 从零构建Qwen3
+# 从零构建 Qwen3
 
-本文件夹中的[standalone-qwen3.ipynb](standalone-qwen3.ipynb) Jupyter笔记本包含了Qwen3 0.6B、1.7B、4B、8B和32B的从零实现。
+本文件夹中的 [standalone-qwen3.ipynb](standalone-qwen3.ipynb) Jupyter notebook 包含了 Qwen3 0.6B、1.7B、4B、8B 和 32B 的从零实现。
 
 <img src="https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/qwen/qwen-overview.webp">
 
-本文件夹中的[standalone-qwen3-moe.ipynb](standalone-qwen3-moe.ipynb)和[standalone-qwen3-moe-plus-kvcache.ipynb](standalone-qwen3-moe-plus-kvcache.ipynb) Jupyter笔记本包含了30B-A3B专家混合（MoE）的从零实现，包括思维（Thinking）、指令（Instruct）和编程（Coder）模型变体。
+本文件夹中的 [standalone-qwen3-moe.ipynb](standalone-qwen3-moe.ipynb) 和 [standalone-qwen3-moe-plus-kvcache.ipynb](standalone-qwen3-moe-plus-kvcache.ipynb) Jupyter notebook 包含了 30B-A3B 专家混合（MoE）模型的从零实现，涵盖思维（Thinking）、指令（Instruct）和编程（Coder）变体。
 
 <img src="https://sebastianraschka.com/images/LLMs-from-scratch-images/bonus/qwen/qwen3-coder-flash-overview.webp?123" width="430px">
 
 &nbsp;
-# Qwen3从零开始的代码
+# Qwen3 从零实现代码
 
-此文件夹中的独立笔记本以线性方式包含从零开始的代码：
+此文件夹中的独立 notebook 按线性方式组织了从零实现代码：
 
-1. [standalone-qwen3.ipynb](standalone-qwen3.ipynb)：不带花里胡哨功能的密集Qwen3模型
-2. [standalone-qwen3-plus-kvcache.ipynb](standalone-qwen3-plus-kvcache.ipynb)：与上面相同，但带有KV缓存以提高推理效率
-3. [standalone-qwen3-moe.ipynb](standalone-qwen3-moe.ipynb)：像第一个笔记本一样，但是专家混合（MoE）变体
-4. [standalone-qwen3-moe-plus-kvcache.ipynb](standalone-qwen3-moe-plus-kvcache.ipynb)：与上面相同，但带有KV缓存以提高推理效率
+1. [standalone-qwen3.ipynb](standalone-qwen3.ipynb)：基础版的稠密 Qwen3 模型实现
+2. [standalone-qwen3-plus-kvcache.ipynb](standalone-qwen3-plus-kvcache.ipynb)：与上面相同，但加入了 KV 缓存以提高推理效率
+3. [standalone-qwen3-moe.ipynb](standalone-qwen3-moe.ipynb)：与第一个 notebook 类似，但实现的是专家混合（MoE）变体
+4. [standalone-qwen3-moe-plus-kvcache.ipynb](standalone-qwen3-moe-plus-kvcache.ipynb)：与上面相同，但加入了 KV 缓存以提高推理效率
 
-另外，还将代码组织成Python包[这里](../../pkg/llms_from_scratch/)（包括单元测试和CI），可以按照下面描述的方式运行。
+此外，代码也被整理成了 Python 包，位于[这里](../../pkg/llms_from_scratch/)（包含单元测试和 CI），可以按下文所述方式运行。
 
 &nbsp;
 # 训练
 
-`Qwen3Model`类以类似于`GPTModel`类的风格实现，因此可以用作第5章训练和第6章、第7章微调的即插即用替换。
+`Qwen3Model` 类的实现风格与 `GPTModel` 类似，因此可以作为第 5 章训练以及第 6、7 章微调代码中的即插即用替代方案。
 
 &nbsp;
 # 通过`llms-from-scratch`包使用Qwen3
 
-为了便于使用Qwen3从零开始的实现，还可以使用基于此仓库源代码的`llms-from-scratch` PyPI包，位于[pkg/llms_from_scratch](../../pkg/llms_from_scratch)。
+为了更方便地使用 Qwen3 的从零实现，你也可以使用基于本仓库源码构建的 `llms-from-scratch` PyPI 包，位于 [pkg/llms_from_scratch](../../pkg/llms_from_scratch)。
 
 &nbsp;
 #### 1) 安装
@@ -59,7 +59,7 @@ USE_INSTRUCT_MODEL = False
 # 也适用于Qwen3 Coder Flash模型
 ```
 
-用户可以定义的基本文本生成设置。使用150个tokens，0.6B模型需要约1.5GB内存。
+下面是用户可自定义的基础文本生成设置。以生成 150 个 token 为例，0.6B 模型大约需要 1.5 GB 内存。
 
 ```python
 MAX_NEW_TOKENS = 150
@@ -70,7 +70,7 @@ TOP_K = 1
 &nbsp;
 #### 3a) 0.6B模型的权重下载和加载
 
-以下代码根据上面选择的模型（思维或基础）自动下载权重文件。请注意，本节重点关注0.6B模型。如果您想使用任何更大的模型（1.7B、4B、8B或32B），请跳过本节并继续第3b)节。
+下面的代码会根据上面选择的模型类型（思维或基础）自动下载权重文件。请注意，本节重点关注 0.6B 模型。如果你想使用更大的模型（1.7B、4B、8B 或 32B），请跳过本节并继续阅读第 3b) 节。
 
 ```python
 from llms_from_scratch.qwen3 import download_from_huggingface
@@ -115,13 +115,13 @@ model.to(device);
 &nbsp;
 #### 3b) 更大Qwen模型的权重下载和加载
 
-如果您对使用任何更大的Qwen模型感兴趣，例如1.7B、4B、8B或32B，请使用下面的代码而不是3a)下的代码，这需要额外的代码依赖：
+如果你想使用更大的 Qwen 模型，例如 1.7B、4B、8B 或 32B，请使用下面这段代码，而不是 3a) 中的代码；这需要额外安装一些依赖：
 
 ```bash
 pip install safetensors huggingface_hub
 ```
 
-然后使用以下代码（对`USE_MODEL`进行适当更改以选择所需的模型大小）
+然后使用以下代码（按需修改 `USE_MODEL` 以选择想要的模型规模）
 
 ```python
 USE_MODEL = "1.7B"
@@ -149,7 +149,7 @@ if not USE_REASONING_MODEL:
   local_dir = f"{local_dir}-Base"
 ```
 
-现在，将权重下载并加载到`model`中：
+现在，将权重下载并加载到 `model` 中：
 
 ```python
 from llms_from_scratch.qwen3 import (
@@ -173,7 +173,7 @@ weights_dict = download_from_huggingface_from_snapshots(
 )
 load_weights_into_qwen(model, QWEN3_CONFIG, weights_dict)
 model.to(device)  # 仅对MoE模型需要
-del weights_dict  # 删除权重字典以释放磁盘空间
+del weights_dict  # 删除权重字典以释放内存
 ```
 
 
@@ -181,7 +181,7 @@ del weights_dict  # 删除权重字典以释放磁盘空间
 
 #### 4) 初始化分词器
 
-以下代码下载并初始化分词器：
+下面的代码会下载并初始化分词器：
 
 ```python
 from llms_from_scratch.qwen3 import Qwen3Tokenizer
@@ -206,7 +206,7 @@ tokenizer = Qwen3Tokenizer(
 
 #### 5) 生成文本
 
-最后，可以通过以下代码生成文本：
+最后，可以使用下面的代码生成文本：
 
 ```python
 prompt = "Give me a short introduction to large language models."
@@ -249,7 +249,7 @@ output_text = tokenizer.decode(output_token_ids.squeeze(0).tolist())
 print("\n\nOutput text:\n\n", output_text + "...")
 ```
 
-使用Qwen3 0.6B思维模型时，输出应类似于下面显示的内容（这是在A100上运行的）：
+使用 Qwen3 0.6B 思维模型时，输出大致应与下面类似（示例在 A100 上运行）：
 
 ```
 Time: 6.35 sec
@@ -266,7 +266,7 @@ Large language models (LLMs) are advanced artificial intelligence systems design
 
 
 
-对于更大的模型，可能更喜欢流式变体，它会在生成后立即打印每个token：
+对于更大的模型，你可能更偏好流式生成版本，它会在生成过程中立即打印每个 token：
 
 ```python
 from llms_from_scratch.generate import generate_text_simple_stream
@@ -299,7 +299,7 @@ Large language models (LLMs) are advanced artificial intelligence systems design
 
 #### 专业技巧1：通过编译加速推理
 
-为了获得高达4×的加速，将
+为了获得最高可达 4 倍的加速，可以将
 
 ```python
 model.to(device)
@@ -312,9 +312,9 @@ model.to(device)
 model = torch.compile(model)
 ```
 
-注意：编译时会有显著的多分钟前期成本，并且在第一次`generate`调用后加速才会生效。
+注意：编译会带来显著的前期开销，通常需要几分钟，并且加速效果要在第一次 `generate` 调用之后才会体现出来。
 
-下表显示了在A100上连续`generate`调用的性能比较：
+下表展示了在 A100 上连续调用 `generate` 时的性能对比：
 
 |                          | 硬件          | Tokens/sec | 内存   |
 | ------------------------ | ------------- | ---------- | ------ |
@@ -325,7 +325,7 @@ model = torch.compile(model)
 &nbsp;
 #### 专业技巧2：通过KV缓存加速推理
 
-在CPU上运行模型时，可以使用KV缓存`Qwen3Model`即插即用替换来显著提升推理性能。（有关KV缓存的更多信息，请参阅我的文章[从零理解和编码LLM中的KV缓存](https://magazine.sebastianraschka.com/p/coding-the-kv-cache-in-llms)。）
+在 CPU 上运行模型时，可以使用支持 KV 缓存的 `Qwen3Model` 作为即插即用替代，以显著提升推理性能。（有关 KV 缓存的更多信息，请参阅我的文章[从零理解和实现 LLM 中的 KV 缓存](https://magazine.sebastianraschka.com/p/coding-the-kv-cache-in-llms)。）
 
 ```python
 from llms_from_scratch.kv_cache.qwen3 import Qwen3Model
@@ -341,7 +341,7 @@ token_ids = generate_text_simple(
 )
 ```
 
-请注意，峰值内存使用量仅针对Nvidia CUDA设备列出，因为这样更容易计算。但是，其他设备上的内存使用量可能类似，因为它使用类似的精度格式，并且KV缓存存储导致生成的150-token文本的内存使用量甚至更低（但是，不同设备可能以不同方式实现矩阵乘法，可能导致不同的峰值内存要求；并且KV缓存内存在更长的上下文长度下可能会过度增加）。
+请注意，峰值内存使用量这里只列出了 Nvidia CUDA 设备上的数值，因为这类设备更容易精确测量。不过，其他设备上的内存占用通常也会比较接近，因为它们使用了类似的精度格式；同时，KV 缓存版本在生成 150 个 token 时的内存占用甚至更低。当然，不同设备的矩阵乘法实现方式可能不同，因此峰值内存需求也可能有所差异；另外，随着上下文长度增长，KV 缓存本身的内存占用也会明显增加。
 
 | 模型           | 模式              | 硬件          | Tokens/sec | GPU内存（VRAM） |
 | --------------- | ----------------- | ------------- | ---------- | --------------- |
@@ -360,16 +360,16 @@ token_ids = generate_text_simple(
 | Qwen3Model 0.6B | KV缓存            | Nvidia A100 GPU | 25         | 1.47 GB           |
 | Qwen3Model 0.6B | KV缓存编译        | Nvidia A100 GPU | 90         | 1.48 GB           |
 
-请注意，上面所有设置都经过测试，产生相同的文本输出。
+请注意，上述所有设置都经过测试，并且会生成相同的文本输出。
 
 
 &nbsp;
 
 #### 专业技巧3：批处理推理
 
-可以通过批处理推理进一步增加吞吐量。虽然这不是一个完全可比较的对比，因为现在使用更多的输入序列运行推理，这增加了每秒钟的tokens吞吐量，但同时以增加内存使用量为代价。
+还可以通过批量推理进一步提高吞吐量。虽然这并不是完全可直接比较的设置，因为此时会同时处理更多输入序列，从而提高每秒 token 吞吐量，但代价是更高的内存占用。
 
-这只需要对准备提示进行小的代码修改。例如，考虑下面这个批处理提示：
+这只需要对提示准备逻辑做少量修改。例如，考虑下面这个批量提示示例：
 
 ```python
 from llms_from_scratch.ch04 import generate_text_simple
@@ -402,7 +402,7 @@ output_token_ids = generate_text_simple(
 )
 ```
 
-KV缓存版本的代码类似，除了它需要使用这些即插即用替换：
+KV 缓存版本的代码与之类似，只是需要使用下面这些即插即用替换：
 
 ```python
 from llms_from_scratch.kv_cache_batched.generate import generate_text_simple
@@ -410,7 +410,7 @@ from llms_from_scratch.kv_cache_batched.qwen3 import Qwen3Model
 ```
 
 
-下面的实验使用批大小8运行。
+下面的实验使用批大小 8 运行。
 
 | 模型            | 模式              | 硬件          | 批大小 | Tokens/sec | GPU内存（VRAM） |
 | ---------------- | ----------------- | ------------- | ------ | ---------- | --------------- |
