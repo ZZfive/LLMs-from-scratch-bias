@@ -1,3 +1,64 @@
 {
-  "managed_files": {}
+  "managed_files": {
+    "ch04/09_dsa/README.md": {
+      "type": "markdown",
+      "last_automated_target_hash": "071b3869d659ee87f9f3e17b340c8a03478b1ad9aefbe4d82eac0318f8d3a451",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:10:56+00:00"
+    },
+    "ch04/10_kv-sharing/README.md": {
+      "type": "markdown",
+      "last_automated_target_hash": "c5d8145fe1ccb9fb99af62732907e90dc06ce2d31620a3b1bbb9479e9e229335",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:13:44+00:00"
+    },
+    "ch05/12_gemma3/tests/gemma3-transformers-ref.ipynb": {
+      "type": "notebook",
+      "last_automated_target_hash": "34cb92b8b5d21959f8670f40d0579308dfae08255fb2bebe37e7b67c9195fdbe",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:19:20+00:00"
+    },
+    "ch05/17_gemma4/README.md": {
+      "type": "markdown",
+      "last_automated_target_hash": "f817fbbc7d9f3a774fa10e1c90a8db13e8a0b83b8665de27c8c1543d4777a70c",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:19:58+00:00"
+    },
+    "ch05/17_gemma4/standalone-gemma4-plus-kvcache.ipynb": {
+      "type": "notebook",
+      "last_automated_target_hash": "cec477fd357304b663cc50544d7013a62ae14afff9243355bbe265f3a9500ff7",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:26:29+00:00"
+    },
+    "ch05/17_gemma4/standalone-gemma4.ipynb": {
+      "type": "notebook",
+      "last_automated_target_hash": "c4033b6fc8d34a07a8104fa8f8c9bd919600e3a9dbda10006a307740b22a303e",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:33:29+00:00"
+    },
+    "ch05/17_gemma4/tests/test_e2b/gemma4-e2b-transformers-ref.ipynb": {
+      "type": "notebook",
+      "last_automated_target_hash": "3a9607558a38886946ade26f8465f3171001b937390fe3fd858d2adb4e64ddb9",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:39:45+00:00"
+    },
+    "ch05/17_gemma4/tests/test_e4b/gemma4-e4b-transformers-ref.ipynb": {
+      "type": "notebook",
+      "last_automated_target_hash": "8a0de553708fb58ce04e826adb5df47b3cf9781f60105973e3497441421171b4",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:44:10+00:00"
+    },
+    "ch05/18_muon/README.md": {
+      "type": "markdown",
+      "last_automated_target_hash": "c388bca782cbe940928cd2ddf09fa3a2b0938bd00c19c62b41ce74148aa3756d",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:47:27+00:00"
+    },
+    "troubleshooting.md": {
+      "type": "markdown",
+      "last_automated_target_hash": "afa63772b8adf69dc897dd5f80ddee6209346f5ca4dfcc0b84d192eaa58b7ab5",
+      "last_upstream_sha": "ec0bac5e1d854306a8ea6c308da49aae22479bd1",
+      "last_translated_at": "2026-08-22T03:50:22+00:00"
+    }
+  }
 }
